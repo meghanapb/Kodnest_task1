@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KodNest Premium Build System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="project-name">KodNest Premium</div>
+        <div class="progress-indicator">Step 1 / 5</div>
+        <div class="status-badge status-in-progress">In Progress</div>
+    </header>
+
+    <!-- Context Header -->
+    <section class="context-header">
+        <h1>Define Your Core Architecture</h1>
+        <p class="subtext">Establish the foundational data models and relationships before proceeding to interface
+            design.</p>
+    </section>
+
+    <!-- Main Layout -->
+    <main class="main-layout">
+        <!-- Primary Workspace (70%) -->
+        <section class="primary-workspace">
+            <div class="card">
+                <h2 class="card-title">Data Models</h2>
+                <div class="form-group">
+                    <label for="model-name">Model Name</label>
+                    <input type="text" id="model-name" placeholder="e.g. User, Order, Product" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="attributes">Attributes</label>
+                    <textarea id="attributes" placeholder="Define attributes here..." class="input-field"></textarea>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">Save Model</button>
+                    <button class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <h2 class="card-title">Existing Models</h2>
+                <!-- Empty State: Validates "provide next action, never feel dead" -->
+                <div class="empty-state">
+                    <p>You haven't defined any data models yet. Models define the structure of your application's data.
+                    </p>
+                    <button class="btn btn-secondary">Create First Model</button>
+                </div>
+            </div>
+
+            <!-- Example of Error State: Validates "explain what went wrong, how to fix" -->
+            <div class="card" style="margin-top: 24px;">
+                <h2 class="card-title">Validation Example</h2>
+                <div class="form-group">
+                    <label for="project-slug">Project Slug</label>
+                    <input type="text" id="project-slug" value="My Project Name" class="input-field"
+                        style="border-color: var(--accent-color);">
+                    <div class="error-message">
+                        <span class="error-icon">!</span>
+                        <span>Project slug can only contain lowercase letters and hyphens (e.g.,
+                            'my-project-name').</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secondary Panel (30%) -->
+        <aside class="secondary-panel">
+            <div class="step-explanation">
+                <h3>Why this matters</h3>
+                <p>Solid data architecture prevents technical debt later. efficient querying depends on this step.</p>
+            </div>
+
+            <div class="prompt-box">
+                <label>AI Assistant Prompt</label>
+                <div class="prompt-content">
+                    Suggest a normalized schema for a multi-tenant SaaS application with user roles and permissions.
+                </div>
+                <button class="btn btn-secondary btn-sm btn-full">Copy Prompt</button>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn btn-primary btn-full">Build in Lovable</button>
+                <div class="row">
+                    <button class="btn btn-secondary btn-half">It Worked</button>
+                    <button class="btn btn-secondary btn-half">Error</button>
+                </div>
+                <button class="btn btn-secondary btn-full">Add Screenshot</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Proof Footer -->
+    <footer class="proof-footer">
+        <div class="proof-item">
+            <input type="checkbox" id="proof-ui" class="proof-check">
+            <label for="proof-ui">UI Built</label>
+        </div>
+        <div class="proof-item">
+            <input type="checkbox" id="proof-logic" class="proof-check">
+            <label for="proof-logic">Logic Working</label>
+        </div>
+        <div class="proof-item">
+            <input type="checkbox" id="proof-test" class="proof-check">
+            <label for="proof-test">Test Passed</label>
+        </div>
+        <div class="proof-item">
+            <input type="checkbox" id="proof-deploy" class="proof-check">
+            <label for="proof-deploy">Deployed</label>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
