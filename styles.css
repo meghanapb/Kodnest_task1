@@ -47,6 +47,7 @@ body {
 a {
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
     transition: color var(--transition-speed) var(--transition-ease);
 }
 
@@ -87,7 +88,6 @@ a {
     font-weight: 500;
     font-size: 14px;
     padding: 20px 0;
-    /* Matches header height for click area */
     border-bottom: 2px solid transparent;
     color: var(--text-secondary);
 }
@@ -143,7 +143,6 @@ a {
 
 .mobile-nav.open {
     display: block;
-    /* Toggled via JS */
 }
 
 /* Main View Container */
@@ -154,14 +153,21 @@ a {
     min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    /* Align content to top */
+    align-items: center;
+    /* Center content generally */
+    text-align: center;
 }
 
-/* Placeholder View Styles */
+/* View Header */
 .view-header {
     margin-bottom: var(--space-lg);
+    width: 100%;
+    text-align: left;
+    /* Headers usually left aligned in dashboard views, but centered in hero */
 }
+
+/* Override for specific views via specific ID or layout if needed. 
+For now, let's keep view-header left-aligned as per SaaS standards in dashboards. */
 
 .view-title {
     font-family: var(--font-serif);
@@ -176,6 +182,207 @@ a {
     font-size: 18px;
     color: var(--text-secondary);
     max-width: 600px;
+}
+
+/* Hero Section (Home) */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: var(--space-xl);
+    max-width: 800px;
+}
+
+.hero-title {
+    font-family: var(--font-serif);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    line-height: 1.2;
+}
+
+.hero-subtext {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+/* Components */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+    border: 1px solid transparent;
+    text-decoration: none;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: #FFFFFF;
+    border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: var(--space-md);
+    border-radius: 4px;
+    box-shadow: none;
+    text-align: left;
+    /* Reset text align for cards */
+    width: 100%;
+    max-width: 720px;
+    /* Readable width for forms */
+}
+
+.card-title {
+    font-size: 20px;
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-xs);
+    font-family: var(--font-serif);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: var(--space-md);
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    transition: border-color var(--transition-speed) var(--transition-ease);
+    box-shadow: none;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+/* Radio Pills */
+.radio-pill-group {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.radio-pill {
+    position: relative;
+    cursor: pointer;
+}
+
+.radio-pill input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radio-pill span {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    /* Pill shape */
+    font-size: 14px;
+    transition: all var(--transition-speed) var(--transition-ease);
+    color: var(--text-secondary);
+}
+
+.radio-pill input:checked+span {
+    background-color: var(--text-primary);
+    color: #FFFFFF;
+    border-color: var(--text-primary);
+}
+
+.radio-pill:hover span {
+    border-color: var(--text-primary);
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+    background-color: #FAFAFA;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.empty-icon-large {
+    font-size: 48px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    margin-bottom: var(--space-xs);
+    font-family: var(--font-serif);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+    max-width: 100%;
+}
+
+/* Proof Footer */
+.proof-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.proof-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 /* Responsive Styles */
@@ -194,5 +401,9 @@ a {
 
     .view-container {
         padding: var(--space-lg) var(--space-md);
+    }
+
+    .hero-title {
+        font-size: 32px;
     }
 }
