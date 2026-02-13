@@ -1,53 +1,77 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Copy Prompt Functionality
-    const copyBtn = document.querySelector('.secondary-panel .btn-sm');
-    const promptContent = document.querySelector('.prompt-content');
 
-    if (copyBtn && promptContent) {
-        copyBtn.addEventListener('click', () => {
-            const originalText = copyBtn.innerText;
-            const textToCopy = promptContent.innerText.trim();
+    // --- Router Logic ---
+    const appView = document.getElementById('app-view');
+    const navItems = document.querySelectorAll('.nav-item');
 
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                copyBtn.innerText = 'Copied!';
-                copyBtn.classList.add('btn-primary');
-                copyBtn.classList.remove('btn-secondary');
-                
-                setTimeout(() => {
-                    copyBtn.innerText = originalText;
-                    copyBtn.classList.remove('btn-primary');
-                    copyBtn.classList.add('btn-secondary');
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        });
-    }
+    // Define routes and their content
+    const routes = {
+        'dashboard': {
+            title: 'Dashboard',
+            subtext: 'This section will be built in the next step. It will contain an overview of your job notifications.'
+        },
+        'saved': {
+            title: 'Saved Jobs',
+            subtext: 'This section will be built in the next step. It will list your saved opportunities.'
+        },
+        'digest': {
+            title: 'Daily Digest',
+            subtext: 'This section will be built in the next step. It will show your summarized updates.'
+        },
+        'settings': {
+            title: 'Settings',
+            subtext: 'This section will be built in the next step. Configure your notification preferences here.'
+        },
+        'proof': {
+            title: 'Verification Proof',
+            subtext: 'This section will be built in the next step. Use this to verify your implementation.'
+        }
+    };
 
-    // Proof Footer Logic (Visual Feedback)
-    const checks = document.querySelectorAll('.proof-check');
-    const statusBadge = document.querySelector('.status-badge');
+    function renderView() {
+        // Get hash (remove #), default to 'dashboard' if empty or invalid
+        let hash = window.location.hash.substring(1).toLowerCase();
+        if (!hash || !routes[hash]) {
+            hash = 'dashboard';
+        }
 
-    function updateStatus() {
-        const allChecked = Array.from(checks).every(checkbox => checkbox.checked);
-        if (allChecked) {
-            statusBadge.textContent = 'Shipped';
-            statusBadge.classList.remove('status-in-progress');
-            statusBadge.style.backgroundColor = 'var(--success-color)';
-            statusBadge.style.color = '#FFFFFF';
-            statusBadge.style.borderColor = 'transparent';
-        } else {
-             // Reset to in-progress if unchecked
-            const someChecked = Array.from(checks).some(checkbox => checkbox.checked);
-            if (someChecked) {
-                 statusBadge.textContent = 'In Progress';
-                 // Revert styles would be needed here if we change them dynamically often
-                 // For now, simpler is better.
+        const routeData = routes[hash];
+
+        // 1. Update View Content
+        appView.innerHTML = `
+            <div class="view-header">
+                <h1 class="view-title">${routeData.title}</h1>
+                <p class="view-subtext">${routeData.subtext}</p>
+            </div>
+        `;
+
+        // 2. Update Active Link State
+        navItems.forEach(item => {
+            if (item.getAttribute('href') === `#${hash}`) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
             }
+        });
+
+        // 3. Close mobile menu if open
+        const mobileNav = document.querySelector('.mobile-nav');
+        if (mobileNav.classList.contains('open')) {
+            mobileNav.classList.remove('open');
         }
     }
 
-    checks.forEach(check => {
-        check.addEventListener('change', updateStatus);
-    });
+    // Initialize router
+    window.addEventListener('hashchange', renderView);
+    renderView(); // Initial render
+
+    // --- Mobile Menu Logic ---
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileNav = document.querySelector('.mobile-nav');
+
+    if (menuBtn && mobileNav) {
+        menuBtn.addEventListener('click', () => {
+            mobileNav.classList.toggle('open');
+        });
+    }
 });

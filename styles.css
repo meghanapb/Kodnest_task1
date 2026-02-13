@@ -4,10 +4,8 @@
     --bg-color: #F7F6F3;
     --text-primary: #111111;
     --text-secondary: #444444;
-    /* Slightly softer for secondary text */
     --accent-color: #8B0000;
     --accent-hover: #A00000;
-    /* Slightly lighter for hover */
     --success-color: #4A6B4A;
     --warning-color: #B08D55;
     --border-color: #E0E0E0;
@@ -44,291 +42,157 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    margin-bottom: var(--space-sm);
-    color: var(--text-primary);
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition-speed) var(--transition-ease);
 }
 
-p {
-    margin-bottom: var(--space-sm);
-    max-width: 720px;
+/* Navigation Bar */
+.nav-bar {
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 var(--space-lg);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-/* Layout Structure */
-.top-bar {
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 64px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-sm) var(--space-lg);
-    background-color: var(--bg-color);
-    border-bottom: 1px solid var(--border-color);
-    height: 64px;
 }
 
-.context-header {
-    padding: var(--space-lg) var(--space-lg);
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-.context-header h1 {
-    font-size: 32px;
-    margin-bottom: var(--space-xs);
-}
-
-.context-header .subtext {
-    font-size: 18px;
-    color: var(--text-secondary);
+.nav-logo {
     font-family: var(--font-serif);
-    font-style: italic;
-}
-
-.main-layout {
-    display: flex;
-    flex: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    gap: var(--space-lg);
-    padding: 0 var(--space-lg) var(--space-xl);
-    /* Bottom padding for footer */
-}
-
-.primary-workspace {
-    flex: 7;
-}
-
-.secondary-panel {
-    flex: 3;
-    background-color: transparent;
-    border-left: 1px solid var(--border-color);
-    padding-left: var(--space-lg);
-}
-
-.proof-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--bg-color);
-    border-top: 1px solid var(--border-color);
-    padding: var(--space-sm) var(--space-lg);
-    display: flex;
-    justify-content: center;
-    gap: var(--space-lg);
-    z-index: 100;
-}
-
-/* Component: Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 14px;
-    border-radius: 4px;
-    /* Consistent radius */
-    cursor: pointer;
-    transition: all var(--transition-speed) var(--transition-ease);
-    border: 1px solid transparent;
-    /* Prepare for secondary */
-    text-decoration: none;
-    box-shadow: none;
-    /* No shadows */
-}
-
-.btn-primary {
-    background-color: var(--accent-color);
-    color: #FFFFFF;
-    border-color: var(--accent-color);
-}
-
-.btn-primary:hover {
-    background-color: var(--accent-hover);
-    border-color: var(--accent-hover);
-}
-
-.btn-secondary {
-    background-color: transparent;
-    border-color: var(--text-primary);
+    font-weight: 700;
+    font-size: 20px;
     color: var(--text-primary);
 }
 
-.btn-secondary:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    /* Subtle hover */
-}
-
-/* Component: Cards */
-.card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    padding: var(--space-md);
-    border-radius: 4px;
-    /* Consistent radius */
-    box-shadow: none;
-    /* STRICT: No drop shadows */
-}
-
-/* Component: Inputs */
-.input-field {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    /* Consistent radius */
-    font-family: var(--font-sans);
-    font-size: 16px;
-    transition: border-color var(--transition-speed) var(--transition-ease);
-    box-shadow: none;
-    /* STRICT: No heavy shadows */
-}
-
-.input-field:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 1px var(--accent-color);
-    /* Clear focus state, clean border only */
-}
-
-/* Component: Empty States */
-.empty-state {
-    text-align: center;
-    padding: var(--space-lg);
-    background-color: #FAFAFA;
-    /* Very subtle difference */
-    border-radius: 4px;
-}
-
-.empty-state p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-md);
-    max-width: 100%;
-    /* Reset max-width for center alignment */
-}
-
-/* Component: Error States */
-.error-message {
-    font-size: 14px;
-    color: var(--accent-color);
-    /* Use accent (red) for errors */
-    background-color: #FFF0F0;
-    padding: var(--space-sm);
-    border-radius: 4px;
-    border: 1px solid #FFD0D0;
-    margin-top: var(--space-sm);
+/* Desktop Navigation */
+.desktop-nav {
     display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+    gap: var(--space-lg);
+    list-style: none;
 }
 
-.error-icon {
-    font-weight: bold;
-}
-
-textarea.input-field {
-    min-height: 100px;
-    resize: vertical;
-}
-
-/* Component: Top Bar Elements */
-.project-name {
-    font-weight: 600;
-    font-size: 18px;
-}
-
-.progress-indicator {
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--text-secondary);
-}
-
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-in-progress {
-    background-color: #E8F0FE;
-    /* Example subtle blue, adjust to palette if needed - user said no neon */
-    color: #1A73E8;
-    /* Adjusting to match palette strictness? User said success=muted green, warning=muted amber. 
-       Let's use a neutral or warning for "In Progress" if not specified, 
-       but standard UI practice usually allows a blue/neutral for progress.
-       Let's stick to the user's specific palette. 
-       Maybe use the Warning color (muted amber) for 'In Progress' or just a neutral grey.
-    */
-    background-color: #F0E6D2;
-    /* Light amber/beige */
-    color: var(--warning-color);
-    border: 1px solid var(--warning-color);
-}
-
-/* Component: Secondary Panel Elements */
-.step-explanation h3 {
-    font-size: 16px;
-    margin-bottom: var(--space-xs);
-}
-
-.step-explanation p {
+.nav-item {
+    font-weight: 500;
     font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-.prompt-box {
-    background-color: #F0F0F0;
-    /* Slightly darker than bg */
-    padding: var(--space-sm);
-    border-radius: 4px;
-    margin: var(--space-md) 0;
-    border: 1px solid var(--border-color);
-}
-
-.prompt-content {
-    font-family: monospace;
-    font-size: 13px;
-    margin-bottom: var(--space-sm);
+    padding: 20px 0;
+    /* Matches header height for click area */
+    border-bottom: 2px solid transparent;
     color: var(--text-secondary);
 }
 
-.panel-actions {
-    margin-top: var(--space-md);
+.nav-item:hover {
+    color: var(--text-primary);
 }
 
-/* Component: Proof Footer */
-.proof-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+.nav-item.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-color);
+    /* Deep red underline */
 }
 
-.proof-check {
-    width: 18px;
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
     height: 18px;
     cursor: pointer;
-    accent-color: var(--success-color);
 }
 
-.proof-item label {
-    margin-bottom: 0;
-    cursor: pointer;
+.mobile-menu-btn span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-primary);
+    border-radius: 2px;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+/* Mobile Navigation Dropdown */
+.mobile-nav {
+    display: none;
+    list-style: none;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-sm);
+}
+
+.mobile-nav li {
+    padding: var(--space-sm) 0;
+    text-align: center;
+}
+
+.mobile-nav .nav-item {
+    padding: var(--space-xs) 0;
+    display: inline-block;
+    border-bottom-width: 2px;
+}
+
+.mobile-nav.open {
+    display: block;
+    /* Toggled via JS */
+}
+
+/* Main View Container */
+.view-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Align content to top */
+}
+
+/* Placeholder View Styles */
+.view-header {
+    margin-bottom: var(--space-lg);
+}
+
+.view-title {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.view-subtext {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 600px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .desktop-nav {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .nav-bar {
+        padding: 0 var(--space-md);
+    }
+
+    .view-container {
+        padding: var(--space-lg) var(--space-md);
+    }
 }
