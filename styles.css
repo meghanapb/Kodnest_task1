@@ -14,8 +14,19 @@
     /* Badges */
     --badge-linkedin: #0A66C2;
     --badge-naukri: #FFD700;
-    /* Darker yellow for text visibility better handled with class */
+    --badge-indeed: #2164f3;
+    --badge-other: #757575;
     --badge-bg-neutral: #EEEEEE;
+
+    /* Match Score Colors */
+    --match-high: #2E7D32;
+    /* Green 800 */
+    --match-med: #F57F17;
+    /* Amber 900 - Darker for readability */
+    --match-low: #616161;
+    /* Grey 700 */
+    --match-none: #9E9E9E;
+    /* Grey 500 */
 
     /* Typography */
     --font-serif: 'Merriweather', serif;
@@ -396,6 +407,40 @@ a {
     background-color: #E0E0E0;
 }
 
+.match-score {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    /* Circular pill */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-color);
+}
+
+.match-score.high {
+    color: var(--match-high);
+    border-color: var(--match-high);
+    background-color: #E8F5E9;
+}
+
+.match-score.med {
+    color: var(--match-med);
+    border-color: var(--match-med);
+    background-color: #FFF8E1;
+}
+
+.match-score.low {
+    color: var(--match-low);
+    border-color: var(--match-low);
+    background-color: #F5F5F5;
+}
+
 .posted-ago {
     font-size: 12px;
     color: #999;
@@ -566,6 +611,7 @@ a {
 .form-group {
     margin-bottom: var(--space-md);
     text-align: left;
+    width: 100%;
 }
 
 label {
@@ -628,6 +674,77 @@ label {
 
 .radio-pill:hover span {
     border-color: var(--text-primary);
+}
+
+/* Settings Specific */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    position: relative;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--accent-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+}
+
+/* Range Input styling */
+input[type=range] {
+    width: 100%;
+    margin: 8px 0;
+    cursor: pointer;
+    accent-color: var(--accent-color);
 }
 
 /* Empty States */
