@@ -8,9 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let savedJobIds = JSON.parse(localStorage.getItem('savedJobs')) || [];
     let jobStatus = JSON.parse(localStorage.getItem('jobTrackerStatus')) || {};
     let statusLog = JSON.parse(localStorage.getItem('jobTrackerStatusLog')) || [];
-
-    // NEW: Test Checklist State
     let testState = JSON.parse(localStorage.getItem('jobTrackerTestState')) || { checks: [], completed: false };
+
+    // NEW: Submission State
+    let submissionState = JSON.parse(localStorage.getItem('jobTrackerSubmission')) || {
+        lovable: '',
+        github: '',
+        deployed: '',
+        shipped: false
+    };
 
     let preferences = JSON.parse(localStorage.getItem('jobTrackerPreferences')) || {
         roleKeywords: '',
@@ -21,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         minMatchScore: 40
     };
 
-    // --- Filters State ---
     let filters = {
         keyword: '',
         location: '',
@@ -33,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showOnlyMatches: false
     };
 
-    // --- Test Configuration ---
+    // --- Configuration ---
     const TEST_ITEMS = [
         { id: 1, text: "Preferences persist after refresh", tip: "Reload page and check settings." },
         { id: 2, text: "Match score calculates correctly", tip: "Verify percentages on dashboard." },
@@ -47,14 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 10, text: "No console errors on main pages", tip: "Open DevTools > Console." }
     ];
 
-    // Initialize checks array if empty
     if (testState.checks.length !== TEST_ITEMS.length) {
         testState.checks = new Array(TEST_ITEMS.length).fill(false);
     }
 
     // --- Match Score Engine ---
     function calculateMatchScore(job) {
-        if (!preferences.roleKeywords && !preferences.skills) return 0; // No prefs set
+        if (!preferences.roleKeywords && !preferences.skills) return 0;
 
         let score = 0;
         const roleKeywords = preferences.roleKeywords.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
@@ -92,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score >= 80) className = 'high';
         else if (score >= 60) className = 'med';
         else if (score >= 40) className = 'neutral';
-
         return `<div class="match-score ${className}">⚡ ${score}% Match</div>`;
     }
 
@@ -114,9 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (statusLog.length > 50) statusLog.pop();
             localStorage.setItem('jobTrackerStatusLog', JSON.stringify(statusLog));
         }
-
         showToast(`Status updated: ${formatStatus(newStatus)}`);
-
         if (window.location.hash === '#dashboard') filterAndRenderDashboard();
         else if (window.location.hash === '#saved') renderView();
     };
@@ -140,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Digest Engine ---
-
     function getTodayDigestKey() {
         const today = new Date().toISOString().split('T')[0];
         return `jobTrackerDigest_${today}`;
@@ -149,14 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateDigest() {
         const scoredJobs = JOB_DATA.map(j => ({ ...j, score: calculateMatchScore(j) }));
         const viableJobs = scoredJobs.filter(j => j.score >= preferences.minMatchScore);
-
         if (viableJobs.length === 0) return null;
-
         viableJobs.sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return a.postedDaysAgo - b.postedDaysAgo;
         });
-
         const digest = viableJobs.slice(0, 10);
         localStorage.setItem(getTodayDigestKey(), JSON.stringify(digest));
         return digest;
@@ -174,10 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             return;
         }
-
         const digestKey = getTodayDigestKey();
         let digest = JSON.parse(localStorage.getItem(digestKey));
-
         if (!digest) {
             appView.innerHTML = `
                 <div class="view-header"><h1 class="view-title">Daily Digest</h1></div>
@@ -191,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
         } else {
             const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
             const listHTML = digest.map(job => `
                 <div class="digest-item">
                     <div>
@@ -204,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `).join('');
-
             const updatesHTML = statusLog.length > 0 ? `
                 <div class="digest-header" style="margin-top:20px; border-top:1px solid #E0E0E0;">
                     <div class="digest-title" style="font-size:18px;">Recent Status Updates</div>
@@ -222,27 +215,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     `).join('')}
                 </div>
             ` : '';
-
             appView.innerHTML = `
                 <div class="view-header" style="text-align:center;"><h1 class="view-title">Daily Digest</h1></div>
-                
                 <div class="digest-container">
                     <div class="digest-header">
                         <div class="digest-title">Top 10 Jobs For You</div>
                         <div class="digest-date">${todayStr}</div>
                     </div>
-                    <div class="digest-body">
-                        ${listHTML}
-                    </div>
-                    
+                    <div class="digest-body">${listHTML}</div>
                     ${updatesHTML}
-
                     <div class="digest-footer">
                         This digest was generated based on your preferences.<br>
                         <a href="#settings" style="text-decoration:underline;">Update Preferences</a>
                     </div>
                 </div>
-
                 <div class="digest-actions">
                      <button class="btn btn-secondary" onclick="copyDigestText()">Copy to Clipboard</button>
                      <button class="btn btn-secondary" onclick="sendDigestEmail()">Create Email Draft</button>
@@ -281,69 +267,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.triggerDigestGeneration = function () {
         const result = generateDigest();
-        if (!result) {
-            alert('No matching roles found today based on your preferences.');
-        } else {
-            renderDigestView();
-        }
+        if (!result) alert('No matching roles found today based on your preferences.');
+        else renderDigestView();
     };
 
     window.copyDigestText = function () {
-        const digestKey = getTodayDigestKey();
-        const digest = JSON.parse(localStorage.getItem(digestKey));
+        const digest = JSON.parse(localStorage.getItem(getTodayDigestKey()));
         if (!digest) return;
-
         let text = `My 9AM Job Digest - ${new Date().toLocaleDateString()}\n\n`;
-        digest.forEach(j => {
-            text += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location} | ${j.salaryRange}\nApply: ${j.applyUrl}\n\n`;
-        });
+        digest.forEach(j => { text += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location} | ${j.salaryRange}\nApply: ${j.applyUrl}\n\n`; });
         navigator.clipboard.writeText(text).then(() => alert('Digest copied to clipboard!'));
     };
 
     window.sendDigestEmail = function () {
-        const digestKey = getTodayDigestKey();
-        const digest = JSON.parse(localStorage.getItem(digestKey));
+        const digest = JSON.parse(localStorage.getItem(getTodayDigestKey()));
         if (!digest) return;
-
         let body = `Here are my top job matches for today:\n\n`;
-        digest.forEach(j => {
-            body += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location}\n${j.applyUrl}\n\n`;
-        });
+        digest.forEach(j => { body += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location}\n${j.applyUrl}\n\n`; });
         window.open(`mailto:?subject=My 9AM Job Digest&body=${encodeURIComponent(body)}`);
     };
 
     // --- Test Checklist Logic ---
-
     window.toggleTestItem = function (index) {
         testState.checks[index] = !testState.checks[index];
-
-        // Check completion
         const allChecked = testState.checks.every(Boolean);
         testState.completed = allChecked;
-
         localStorage.setItem('jobTrackerTestState', JSON.stringify(testState));
-
         renderTestView();
-        checkShipLock();
+        checkProofLock();
     };
 
     window.resetTestStatus = function () {
         testState = { checks: new Array(TEST_ITEMS.length).fill(false), completed: false };
         localStorage.setItem('jobTrackerTestState', JSON.stringify(testState));
         renderTestView();
-        checkShipLock();
+        checkProofLock();
     };
 
-    function checkShipLock() {
-        const shipNav = document.getElementById('nav-ship');
-        const mobileShipNav = document.getElementById('mobile-nav-ship');
+    function checkProofLock() {
+        const proofNav = document.getElementById('nav-proof');
+        const mobileProofNav = document.getElementById('mobile-nav-proof');
 
         if (testState.completed) {
-            if (shipNav) shipNav.classList.remove('locked');
-            if (mobileShipNav) mobileShipNav.classList.remove('locked');
+            if (proofNav) proofNav.classList.remove('locked');
+            if (mobileProofNav) mobileProofNav.classList.remove('locked');
         } else {
-            if (shipNav) shipNav.classList.add('locked');
-            if (mobileShipNav) mobileShipNav.classList.add('locked');
+            if (proofNav) proofNav.classList.add('locked');
+            if (mobileProofNav) mobileProofNav.classList.add('locked');
         }
     }
 
@@ -370,20 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h1 class="view-title">Test Verification</h1>
                 <p class="view-subtext">Route 07: Verify all features before shipping.</p>
             </div>
-
             <div class="test-card">
                 <div class="progress-header">
                     <div class="progress-title">Tests Passed: ${passedCount} / ${totalCount}</div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
-                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progressPercent}%;"></div></div>
                     ${isWarning ? `<div class="progress-warn">Resolve all issues before shipping.</div>` : ''}
                 </div>
-                
-                <div class="test-list">
-                    ${listHTML}
-                </div>
-
+                <div class="test-list">${listHTML}</div>
                 <div style="padding:20px; text-align:center; background:#f9f9f9; border-top:1px solid #eee;">
                     <button class="btn btn-secondary" onclick="resetTestStatus()" style="font-size:12px;">Reset Test Status</button>
                 </div>
@@ -391,23 +354,125 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function renderShipView() {
+    // --- Final Proof & Submission Logic ---
+
+    const PROJECT_STEPS = [
+        "Core Project Setup", "App Shell & Navigation", "Job Data Engine", "Match Score Logic",
+        "Dashboard Filters", "Daily Digest System", "Status Tracking", "Test Verification"
+    ];
+
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function renderProofView() {
+        const filled = submissionState.lovable && submissionState.github && submissionState.deployed;
+        const isShipped = submissionState.shipped;
+
+        let statusText = 'Not Started';
+        let statusClass = 'pending';
+
+        if (isShipped) {
+            statusText = 'Shipped';
+            statusClass = 'shipped';
+        } else if (filled) {
+            statusText = 'In Progress';
+            statusClass = 'pending';
+        }
+
+        const stepHTML = PROJECT_STEPS.map(step => `
+            <div class="step-item">
+                <span class="step-icon">✔</span> ${step}
+            </div>
+        `).join('');
+
         appView.innerHTML = `
              <div class="view-header">
-                <h1 class="view-title">Ready to Ship</h1>
-                <p class="view-subtext">Route 08: All systems go.</p>
+                <h1 class="view-title">Project 1 — Job Notification Tracker</h1>
+                <p class="view-subtext">Final Proof & Submission Dashboard</p>
             </div>
-            <div class="card ship-success">
-                <div class="ship-icon">🚀</div>
-                <h2>You are ready for launch!</h2>
-                <p>All tests passed. System is stable.</p>
-                <div style="margin-top:24px;">
-                    <button class="btn btn-primary" onclick="alert('Deployment simulated!')">Deploy to Production</button>
+            
+            <div style="text-align:center;">
+                <span class="status-badge ${statusClass}">${statusText}</span>
+            </div>
+
+            <div class="submission-card">
+                <div class="step-summary">
+                    ${stepHTML}
                 </div>
+
+                <div style="border-top:1px solid #eee; margin-bottom:24px;"></div>
+
+                <h3 style="font-size:16px; margin-bottom:16px;">Artifact Collection</h3>
+                
+                <form id="submission-form" onsubmit="window.saveSubmissionDetails(event)">
+                    <div class="form-group">
+                        <label class="input-label">Lovable Project Link</label>
+                        <input type="url" id="link-lovable" class="input-field" placeholder="https://lovable.dev/..." value="${submissionState.lovable}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">GitHub Repository</label>
+                        <input type="url" id="link-github" class="input-field" placeholder="https://github.com/..." value="${submissionState.github}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Deployed URL</label>
+                        <input type="url" id="link-deployed" class="input-field" placeholder="https://vercel.com/..." value="${submissionState.deployed}" required>
+                    </div>
+                    
+                    <div style="margin-top:24px; display:flex; gap:12px;">
+                        <button type="submit" class="btn btn-primary" style="flex:1;">Save Actions</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.copySubmission()" style="flex:1;">Copy Final Submission</button>
+                    </div>
+                </form>
+
+                ${isShipped ? `<div class="shipped-message">Project 1 Shipped Successfully.</div>` : ''}
             </div>
         `;
     }
 
+    window.saveSubmissionDetails = function (e) {
+        e.preventDefault();
+        const lovable = document.getElementById('link-lovable').value;
+        const github = document.getElementById('link-github').value;
+        const deployed = document.getElementById('link-deployed').value;
+
+        if (!isValidUrl(lovable) || !isValidUrl(github) || !isValidUrl(deployed)) {
+            alert('Please provide valid URLs including http:// or https://');
+            return;
+        }
+
+        submissionState.lovable = lovable;
+        submissionState.github = github;
+        submissionState.deployed = deployed;
+
+        // Ship Conditions: All Tests Passed + All 3 Links Valid
+        if (testState.completed && lovable && github && deployed) {
+            submissionState.shipped = true;
+        } else {
+            submissionState.shipped = false;
+        }
+
+        localStorage.setItem('jobTrackerSubmission', JSON.stringify(submissionState));
+        renderProofView();
+    };
+
+    window.copySubmission = function () {
+        if (!submissionState.shipped) {
+            alert('Cannot copy. Complete all tests and provide all links to Ship first.');
+            return;
+        }
+
+        const text = `Job Notification Tracker — Final Submission\n\nLovable Project:\n${submissionState.lovable}\n\nGitHub Repository:\n${submissionState.github}\n\nLive Deployment:\n${submissionState.deployed}\n\nCore Features:\n- Intelligent match scoring\n- Daily digest simulation\n- Status tracking\n- Test checklist enforced`;
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Submission copied to clipboard!');
+        });
+    };
 
     // --- View Logic ---
 
@@ -655,16 +720,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // SHIP LOCK GUARD
-        if (hash === 'ship' && !testState.completed) {
-            alert('Ship route is locked. Unresolved issues remain.');
+        if (hash === 'proof' && !testState.completed) {
+            alert('Proof route is locked. Unresolved issues remain.');
             window.location.hash = '#test';
             return;
         }
 
         updateActiveNav(hash);
-
-        // Update Lock Visuals
-        checkShipLock();
+        checkProofLock();
 
         if (hash === 'dashboard') {
             appView.innerHTML = getDashboardHTML();
@@ -681,10 +744,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (hash === 'settings') {
             appView.innerHTML = getSettingsHTML();
             document.getElementById('settings-form').addEventListener('submit', window.saveSettings);
-        } else if (hash === 'test') { // NEW
+        } else if (hash === 'test') { // Route 07
             renderTestView();
-        } else if (hash === 'ship') { // NEW
-            renderShipView();
+        } else if (hash === 'proof') { // Route 08 (Final)
+            renderProofView();
         }
 
         const mobileNav = document.querySelector('.mobile-nav');

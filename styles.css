@@ -1084,7 +1084,78 @@ input[type=range] {
     padding: 60px 20px;
 }
 
-.ship-icon {
-    font-size: 64px;
+/* Final Proof & Submission */
+.submission-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 32px;
+}
+
+.step-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Two columns */
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #444;
+}
+
+.step-icon {
+    margin-right: 8px;
+    color: var(--success-color);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     margin-bottom: 24px;
+}
+
+.status-badge.pending {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.status-badge.shipped {
+    background: #E8F5E9;
+    color: #2E7D32;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+    border: 1px solid #A5D6A7;
+}
+
+.shipped-message {
+    text-align: center;
+    color: #2E7D32;
+    margin-top: 24px;
+    font-size: 14px;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.input-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
 }
