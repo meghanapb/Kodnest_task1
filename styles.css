@@ -11,6 +11,12 @@
     --border-color: #E0E0E0;
     --card-bg: #FFFFFF;
 
+    /* Badges */
+    --badge-linkedin: #0A66C2;
+    --badge-naukri: #FFD700;
+    /* Darker yellow for text visibility better handled with class */
+    --badge-bg-neutral: #EEEEEE;
+
     /* Typography */
     --font-serif: 'Merriweather', serif;
     --font-sans: 'Inter', sans-serif;
@@ -99,7 +105,6 @@ a {
 .nav-item.active {
     color: var(--text-primary);
     border-bottom-color: var(--accent-color);
-    /* Deep red underline */
 }
 
 /* Mobile Menu Button */
@@ -154,7 +159,6 @@ a {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Center content generally */
     text-align: center;
 }
 
@@ -163,11 +167,7 @@ a {
     margin-bottom: var(--space-lg);
     width: 100%;
     text-align: left;
-    /* Headers usually left aligned in dashboard views, but centered in hero */
 }
-
-/* Override for specific views via specific ID or layout if needed. 
-For now, let's keep view-header left-aligned as per SaaS standards in dashboards. */
 
 .view-title {
     font-family: var(--font-serif);
@@ -182,6 +182,295 @@ For now, let's keep view-header left-aligned as per SaaS standards in dashboards
     font-size: 18px;
     color: var(--text-secondary);
     max-width: 600px;
+}
+
+/* Filters Bar */
+.filters-bar {
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--space-sm);
+    margin-bottom: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.filter-input,
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: var(--accent-color);
+}
+
+.filter-input {
+    flex: 2;
+    min-width: 200px;
+}
+
+.filter-select {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Job Grid */
+.job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--space-md);
+    width: 100%;
+    margin-bottom: var(--space-lg);
+}
+
+/* Job Card */
+.job-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--space-md);
+    text-align: left;
+    transition: transform var(--transition-speed) var(--transition-ease), box-shadow var(--transition-speed) var(--transition-ease);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: none;
+    /* Strict starting state */
+}
+
+.job-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* Premium lift */
+}
+
+.job-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-sm);
+}
+
+.job-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.job-company {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.job-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.job-tags {
+    margin-bottom: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background-color: #F0F0F0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.job-salary {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--success-color);
+    margin-bottom: var(--space-sm);
+    margin-top: auto;
+    /* Push to bottom of content before actions */
+    padding-top: var(--space-sm);
+}
+
+.job-actions {
+    display: flex;
+    gap: var(--space-sm);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--space-sm);
+}
+
+.action-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all var(--transition-speed);
+}
+
+.action-view {
+    border-color: var(--border-color);
+}
+
+.action-view:hover {
+    background-color: #F0F0F0;
+}
+
+.action-save {
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.action-save.saved {
+    background-color: var(--text-primary);
+    color: #FFFFFF;
+    border-color: var(--text-primary);
+}
+
+.action-save:hover:not(.saved) {
+    background-color: #F0F0F0;
+}
+
+.action-apply {
+    background-color: var(--accent-color);
+    color: #FFFFFF;
+}
+
+.action-apply:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Badges */
+.badge-source {
+    font-size: 10px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-linkedin {
+    color: #0A66C2;
+    background-color: #E8F4F9;
+}
+
+.badge-naukri {
+    color: #856404;
+    background-color: #FFF3CD;
+}
+
+.badge-indeed {
+    color: #2164f3;
+    background-color: #E1EAFE;
+}
+
+.badge-other {
+    color: var(--text-secondary);
+    background-color: #E0E0E0;
+}
+
+.posted-ago {
+    font-size: 12px;
+    color: #999;
+}
+
+/* Job Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: #FFFFFF;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    border-radius: 4px;
+    padding: var(--space-lg);
+    overflow-y: auto;
+    position: relative;
+    text-align: left;
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+}
+
+.modal-title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+}
+
+.modal-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-section-title {
+    font-weight: 600;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+
+.modal-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
 }
 
 /* Hero Section (Home) */
@@ -261,10 +550,8 @@ For now, let's keep view-header left-aligned as per SaaS standards in dashboards
     border-radius: 4px;
     box-shadow: none;
     text-align: left;
-    /* Reset text align for cards */
     width: 100%;
     max-width: 720px;
-    /* Readable width for forms */
 }
 
 .card-title {
@@ -328,7 +615,6 @@ label {
     padding: 8px 16px;
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    /* Pill shape */
     font-size: 14px;
     transition: all var(--transition-speed) var(--transition-ease);
     color: var(--text-secondary);
@@ -405,5 +691,13 @@ label {
 
     .hero-title {
         font-size: 32px;
+    }
+
+    .filter-input {
+        min-width: 100%;
+    }
+
+    .filter-select {
+        flex: 1 1 45%;
     }
 }
