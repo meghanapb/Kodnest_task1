@@ -885,11 +885,84 @@ input[type=range] {
         font-size: 32px;
     }
 
-    .filter-input {
-        min-width: 100%;
-    }
-
     .filter-select {
         flex: 1 1 45%;
     }
+}
+
+/* Status Styling */
+.status-select {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    /* default */
+    outline: none;
+    appearance: none;
+    /* Hide default arrow somewhat */
+    background-color: transparent;
+    text-align: center;
+    transition: all var(--transition-speed);
+}
+
+.status-select.not-applied {
+    color: var(--text-secondary);
+    background-color: #F5F5F5;
+    border-color: #E0E0E0;
+}
+
+.status-select.applied {
+    color: #1565C0;
+    background-color: #E3F2FD;
+    border-color: #BBDEFB;
+}
+
+.status-select.rejected {
+    color: #C62828;
+    background-color: #FFEBEE;
+    border-color: #FFCDD2;
+}
+
+.status-select.selected {
+    color: #2E7D32;
+    background-color: #E8F5E9;
+    border-color: #C8E6C9;
+}
+
+/* Card Updates based on status */
+.job-card.status-applied {
+    border-left: 4px solid var(--status-applied);
+}
+
+.job-card.status-rejected {
+    border-left: 4px solid var(--status-rejected);
+}
+
+.job-card.status-selected {
+    border-left: 4px solid var(--status-selected);
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #323232;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    z-index: 3000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
 }

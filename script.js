@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- State ---
     let savedJobIds = JSON.parse(localStorage.getItem('savedJobs')) || [];
+    let jobStatus = JSON.parse(localStorage.getItem('jobTrackerStatus')) || {};
+    let statusLog = JSON.parse(localStorage.getItem('jobTrackerStatusLog')) || [];
+
     let preferences = JSON.parse(localStorage.getItem('jobTrackerPreferences')) || {
         roleKeywords: '',
         preferredLocations: '',
@@ -22,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: '',
         experience: '',
         source: '',
+        status: '',
         sort: 'latest',
         showOnlyMatches: false
     };
@@ -70,6 +74,53 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="match-score ${className}">⚡ ${score}% Match</div>`;
     }
 
+    // --- Status Logic ---
+    window.updateJobStatus = function (jobId, newStatus) {
+        // Update State
+        jobStatus[jobId] = newStatus;
+        localStorage.setItem('jobTrackerStatus', JSON.stringify(jobStatus));
+
+        // Log to History
+        const job = JOB_DATA.find(j => j.id === jobId);
+        if (job) {
+            const logEntry = {
+                jobId: jobId,
+                title: job.title,
+                company: job.company,
+                status: newStatus,
+                date: new Date().toISOString()
+            };
+            statusLog.unshift(logEntry); // Add to top
+            if (statusLog.length > 50) statusLog.pop();
+            localStorage.setItem('jobTrackerStatusLog', JSON.stringify(statusLog));
+        }
+
+        // UI Feedback
+        showToast(`Status updated: ${formatStatus(newStatus)}`);
+
+        // Re-render based on context
+        if (window.location.hash === '#dashboard') filterAndRenderDashboard();
+        else if (window.location.hash === '#saved') renderView();
+    };
+
+    function formatStatus(status) {
+        if (status === 'not-applied') return 'Not Applied';
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function showToast(message) {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
     // --- Digest Engine ---
 
     function getTodayDigestKey() {
@@ -78,23 +129,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateDigest() {
-        // Recalculate all scores
         const scoredJobs = JOB_DATA.map(j => ({ ...j, score: calculateMatchScore(j) }));
-
-        // Filter by min threshold
         const viableJobs = scoredJobs.filter(j => j.score >= preferences.minMatchScore);
 
         if (viableJobs.length === 0) return null;
 
-        // Sort: Score Desc, then Date Asc (freshness)
         viableJobs.sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return a.postedDaysAgo - b.postedDaysAgo;
         });
 
-        // Top 10
         const digest = viableJobs.slice(0, 10);
-
         localStorage.setItem(getTodayDigestKey(), JSON.stringify(digest));
         return digest;
     }
@@ -116,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let digest = JSON.parse(localStorage.getItem(digestKey));
 
         if (!digest) {
-            // Show Generate Button
             appView.innerHTML = `
                 <div class="view-header"><h1 class="view-title">Daily Digest</h1></div>
                 <div class="empty-state">
@@ -124,10 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>Your 9AM Digest is ready.</h3>
                     <p>Generate your personalized list of top opportunities for today.</p>
                     <button class="btn btn-primary btn-lg" onclick="triggerDigestGeneration()">Generate Today's 9AM Digest (Simulated)</button>
+                    ${statusLog.length > 0 ? getRecentUpdatesHTML() : ''} 
                     <p style="margin-top:20px; font-size:12px; color:#999;">Demo Mode: Daily 9AM trigger simulated manually.</p>
                 </div>`;
         } else {
-            // Render Digest
             const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
             const listHTML = digest.map(job => `
@@ -143,6 +187,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
 
+            const updatesHTML = statusLog.length > 0 ? `
+                <div class="digest-header" style="margin-top:20px; border-top:1px solid #E0E0E0;">
+                    <div class="digest-title" style="font-size:18px;">Recent Status Updates</div>
+                </div>
+                <div class="digest-body">
+                    ${statusLog.slice(0, 5).map(log => `
+                        <div class="digest-item">
+                            <div style="font-size:13px;">
+                                <strong>${log.title}</strong> @ ${log.company}
+                            </div>
+                            <div style="font-size:12px; font-weight:600; color:${getStatusColor(log.status)};">
+                                ${formatStatus(log.status)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
             appView.innerHTML = `
                 <div class="view-header" style="text-align:center;"><h1 class="view-title">Daily Digest</h1></div>
                 
@@ -154,6 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="digest-body">
                         ${listHTML}
                     </div>
+                    
+                    ${updatesHTML}
+
                     <div class="digest-footer">
                         This digest was generated based on your preferences.<br>
                         <a href="#settings" style="text-decoration:underline;">Update Preferences</a>
@@ -168,12 +233,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Helper helper
+    function getRecentUpdatesHTML() {
+        return `
+            <div style="margin-top:40px; text-align:left; max-width:400px; margin-left:auto; margin-right:auto;">
+                <h4 style="font-family:var(--font-serif); border-bottom:1px solid #ddd; padding-bottom:8px;">Recent Activity</h4>
+                ${statusLog.slice(0, 3).map(log => `
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:13px; border-bottom:1px solid #f0f0f0;">
+                         <span>${log.title}</span>   
+                         <span style="color:${getStatusColor(log.status)}; font-weight:600;">${formatStatus(log.status)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     function getScoreColor(score) {
         if (score >= 80) return '#2E7D32';
         if (score >= 60) return '#F57F17';
         if (score >= 40) return '#546E7A';
         return '#9E9E9E';
+    }
+
+    function getStatusColor(status) {
+        if (status === 'applied') return '#1565C0';
+        if (status === 'rejected') return '#C62828';
+        if (status === 'selected') return '#2E7D32';
+        return '#757575';
     }
 
     window.triggerDigestGeneration = function () {
@@ -194,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         digest.forEach(j => {
             text += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location} | ${j.salaryRange}\nApply: ${j.applyUrl}\n\n`;
         });
-
         navigator.clipboard.writeText(text).then(() => alert('Digest copied to clipboard!'));
     };
 
@@ -207,12 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
         digest.forEach(j => {
             body += `${j.title} at ${j.company} (${j.score}% Match)\n${j.location}\n${j.applyUrl}\n\n`;
         });
-
         window.open(`mailto:?subject=My 9AM Job Digest&body=${encodeURIComponent(body)}`);
     };
 
-
-    // --- View Logic (Reused) ---
+    // --- View Logic ---
 
     function getDashboardHTML() {
         return `
@@ -253,10 +335,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <option value="1-3">1-3 Years</option>
                     <option value="3-5">3-5 Years</option>
                 </select>
-                 <select id="filter-source" class="filter-select">
-                    <option value="">Source</option>
-                    <option value="LinkedIn">LinkedIn</option>
-                    <option value="Naukri">Naukri</option>
+                <select id="filter-status" class="filter-select">
+                    <option value="">Status (All)</option>
+                    <option value="not-applied">Not Applied</option>
+                    <option value="applied">Applied</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="selected">Selected</option>
                 </select>
                 <select id="filter-sort" class="filter-select" style="border-color: var(--text-primary);">
                     <option value="latest">Latest</option>
@@ -337,17 +421,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderCard(job, score) {
         const isSaved = savedJobIds.includes(job.id);
         const sourceBadge = getSourceBadgeClass(job.source);
-        const matchBadge = getMatchBadgeHTML(score); // Uses corrected logic
+        const matchBadge = getMatchBadgeHTML(score);
+
+        const status = jobStatus[job.id] || 'not-applied';
+        const statusClass = `status-${status}`;
 
         return `
-            <div class="job-card" data-id="${job.id}">
+            <div class="job-card ${statusClass}" data-id="${job.id}">
                 ${matchBadge}
                 <div class="job-card-header" style="margin-top: ${score > 0 ? '20px' : '0'};">
                     <div>
                         <div class="job-title">${job.title}</div>
                         <div class="job-company">${job.company}</div>
                     </div>
-                    <span class="badge-source ${sourceBadge}">${job.source}</span>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                        <span class="badge-source ${sourceBadge}">${job.source}</span>
+                         <select class="status-select ${status}" onchange="updateJobStatus('${job.id}', this.value)" title="Update Status">
+                            <option value="not-applied" ${status === 'not-applied' ? 'selected' : ''}>Not Applied</option>
+                            <option value="applied" ${status === 'applied' ? 'selected' : ''}>Applied</option>
+                            <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            <option value="selected" ${status === 'selected' ? 'selected' : ''}>Selected</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="job-meta">
@@ -375,7 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function filterAndRenderDashboard() {
-        // (Same logic as before, just ensuring it uses the updated renderCard)
         const container = document.getElementById('job-grid-container');
         if (!container) return;
 
@@ -388,7 +482,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchExp = filters.experience ? job.experience === filters.experience : true;
             const matchSource = filters.source ? job.source.includes(filters.source) : true;
             const matchThreshold = filters.showOnlyMatches ? job.score >= preferences.minMatchScore : true;
-            return matchKeyword && matchLoc && matchMode && matchExp && matchSource && matchThreshold;
+
+            const currentStatus = jobStatus[job.id] || 'not-applied';
+            const matchStatus = filters.status ? currentStatus === filters.status : true;
+
+            return matchKeyword && matchLoc && matchMode && matchExp && matchSource && matchThreshold && matchStatus;
         });
 
         if (filters.sort === 'latest') filtered.sort((a, b) => a.postedDaysAgo - b.postedDaysAgo);
@@ -459,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appView.innerHTML = getSettingsHTML();
             document.getElementById('settings-form').addEventListener('submit', window.saveSettings);
         } else if (hash === 'proof') {
-            appView.innerHTML = `<div class="view-header"><h1 class="view-title">Verification Proof</h1></div><div class="card"><div class="proof-list"><div class="proof-item"><input type="checkbox" checked disabled><label>Digest Engine</label></div><div class="proof-item"><input type="checkbox" checked disabled><label>Match Logic</label></div></div></div>`;
+            appView.innerHTML = `<div class="view-header"><h1 class="view-title">Verification Proof</h1></div><div class="card"><div class="proof-list"><div class="proof-item"><input type="checkbox" checked disabled><label>Digest Engine</label></div><div class="proof-item"><input type="checkbox" checked disabled><label>Match Logic</label></div><div class="proof-item"><input type="checkbox" checked disabled><label>Status Tracking</label></div></div></div>`;
         }
 
         const mobileNav = document.querySelector('.mobile-nav');
@@ -467,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function attachDashboardListeners() {
-        ['keyword', 'location', 'mode', 'experience', 'source', 'sort'].forEach(key => {
+        ['keyword', 'location', 'mode', 'experience', 'source', 'sort', 'status'].forEach(key => {
             const el = document.getElementById(`filter-${key}`);
             if (el) el.addEventListener('input', (e) => { filters[key] = e.target.value; filterAndRenderDashboard(); });
         });
