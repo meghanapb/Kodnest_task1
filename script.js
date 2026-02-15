@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let jobStatus = JSON.parse(localStorage.getItem('jobTrackerStatus')) || {};
     let statusLog = JSON.parse(localStorage.getItem('jobTrackerStatusLog')) || [];
 
+    // NEW: Test Checklist State
+    let testState = JSON.parse(localStorage.getItem('jobTrackerTestState')) || { checks: [], completed: false };
+
     let preferences = JSON.parse(localStorage.getItem('jobTrackerPreferences')) || {
         roleKeywords: '',
         preferredLocations: '',
@@ -29,6 +32,25 @@ document.addEventListener('DOMContentLoaded', () => {
         sort: 'latest',
         showOnlyMatches: false
     };
+
+    // --- Test Configuration ---
+    const TEST_ITEMS = [
+        { id: 1, text: "Preferences persist after refresh", tip: "Reload page and check settings." },
+        { id: 2, text: "Match score calculates correctly", tip: "Verify percentages on dashboard." },
+        { id: 3, text: "\"Show only matches\" toggle works", tip: "Toggle and check list." },
+        { id: 4, text: "Save job persists after refresh", tip: "Save a job, reload, check Saved tab." },
+        { id: 5, text: "Apply opens in new tab", tip: "Click Apply on any job." },
+        { id: 6, text: "Status update persists after refresh", tip: "Change status, reload." },
+        { id: 7, text: "Status filter works correctly", tip: "Filter by 'Applied' etc." },
+        { id: 8, text: "Digest generates top 10 by score", tip: "Check Digest tab content." },
+        { id: 9, text: "Digest persists for the day", tip: "Reload page, digest should stay." },
+        { id: 10, text: "No console errors on main pages", tip: "Open DevTools > Console." }
+    ];
+
+    // Initialize checks array if empty
+    if (testState.checks.length !== TEST_ITEMS.length) {
+        testState.checks = new Array(TEST_ITEMS.length).fill(false);
+    }
 
     // --- Match Score Engine ---
     function calculateMatchScore(job) {
@@ -76,11 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Status Logic ---
     window.updateJobStatus = function (jobId, newStatus) {
-        // Update State
         jobStatus[jobId] = newStatus;
         localStorage.setItem('jobTrackerStatus', JSON.stringify(jobStatus));
 
-        // Log to History
         const job = JOB_DATA.find(j => j.id === jobId);
         if (job) {
             const logEntry = {
@@ -90,15 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 status: newStatus,
                 date: new Date().toISOString()
             };
-            statusLog.unshift(logEntry); // Add to top
+            statusLog.unshift(logEntry);
             if (statusLog.length > 50) statusLog.pop();
             localStorage.setItem('jobTrackerStatusLog', JSON.stringify(statusLog));
         }
 
-        // UI Feedback
         showToast(`Status updated: ${formatStatus(newStatus)}`);
 
-        // Re-render based on context
         if (window.location.hash === '#dashboard') filterAndRenderDashboard();
         else if (window.location.hash === '#saved') renderView();
     };
@@ -293,6 +311,103 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         window.open(`mailto:?subject=My 9AM Job Digest&body=${encodeURIComponent(body)}`);
     };
+
+    // --- Test Checklist Logic ---
+
+    window.toggleTestItem = function (index) {
+        testState.checks[index] = !testState.checks[index];
+
+        // Check completion
+        const allChecked = testState.checks.every(Boolean);
+        testState.completed = allChecked;
+
+        localStorage.setItem('jobTrackerTestState', JSON.stringify(testState));
+
+        renderTestView();
+        checkShipLock();
+    };
+
+    window.resetTestStatus = function () {
+        testState = { checks: new Array(TEST_ITEMS.length).fill(false), completed: false };
+        localStorage.setItem('jobTrackerTestState', JSON.stringify(testState));
+        renderTestView();
+        checkShipLock();
+    };
+
+    function checkShipLock() {
+        const shipNav = document.getElementById('nav-ship');
+        const mobileShipNav = document.getElementById('mobile-nav-ship');
+
+        if (testState.completed) {
+            if (shipNav) shipNav.classList.remove('locked');
+            if (mobileShipNav) mobileShipNav.classList.remove('locked');
+        } else {
+            if (shipNav) shipNav.classList.add('locked');
+            if (mobileShipNav) mobileShipNav.classList.add('locked');
+        }
+    }
+
+    function renderTestView() {
+        const passedCount = testState.checks.filter(Boolean).length;
+        const totalCount = TEST_ITEMS.length;
+        const progressPercent = (passedCount / totalCount) * 100;
+        const isWarning = passedCount < totalCount;
+
+        const listHTML = TEST_ITEMS.map((item, index) => `
+            <div class="test-item">
+                <input type="checkbox" class="test-checkbox" 
+                    ${testState.checks[index] ? 'checked' : ''} 
+                    onchange="toggleTestItem(${index})">
+                <label class="test-label" onclick="this.previousElementSibling.click()">
+                    ${item.text}
+                    ${item.tip ? `<span class="test-tooltip" title="${item.tip}">?</span>` : ''}
+                </label>
+            </div>
+        `).join('');
+
+        appView.innerHTML = `
+            <div class="view-header">
+                <h1 class="view-title">Test Verification</h1>
+                <p class="view-subtext">Route 07: Verify all features before shipping.</p>
+            </div>
+
+            <div class="test-card">
+                <div class="progress-header">
+                    <div class="progress-title">Tests Passed: ${passedCount} / ${totalCount}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+                    </div>
+                    ${isWarning ? `<div class="progress-warn">Resolve all issues before shipping.</div>` : ''}
+                </div>
+                
+                <div class="test-list">
+                    ${listHTML}
+                </div>
+
+                <div style="padding:20px; text-align:center; background:#f9f9f9; border-top:1px solid #eee;">
+                    <button class="btn btn-secondary" onclick="resetTestStatus()" style="font-size:12px;">Reset Test Status</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderShipView() {
+        appView.innerHTML = `
+             <div class="view-header">
+                <h1 class="view-title">Ready to Ship</h1>
+                <p class="view-subtext">Route 08: All systems go.</p>
+            </div>
+            <div class="card ship-success">
+                <div class="ship-icon">🚀</div>
+                <h2>You are ready for launch!</h2>
+                <p>All tests passed. System is stable.</p>
+                <div style="margin-top:24px;">
+                    <button class="btn btn-primary" onclick="alert('Deployment simulated!')">Deploy to Production</button>
+                </div>
+            </div>
+        `;
+    }
+
 
     // --- View Logic ---
 
@@ -539,7 +654,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // SHIP LOCK GUARD
+        if (hash === 'ship' && !testState.completed) {
+            alert('Ship route is locked. Unresolved issues remain.');
+            window.location.hash = '#test';
+            return;
+        }
+
         updateActiveNav(hash);
+
+        // Update Lock Visuals
+        checkShipLock();
 
         if (hash === 'dashboard') {
             appView.innerHTML = getDashboardHTML();
@@ -556,8 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (hash === 'settings') {
             appView.innerHTML = getSettingsHTML();
             document.getElementById('settings-form').addEventListener('submit', window.saveSettings);
-        } else if (hash === 'proof') {
-            appView.innerHTML = `<div class="view-header"><h1 class="view-title">Verification Proof</h1></div><div class="card"><div class="proof-list"><div class="proof-item"><input type="checkbox" checked disabled><label>Digest Engine</label></div><div class="proof-item"><input type="checkbox" checked disabled><label>Match Logic</label></div><div class="proof-item"><input type="checkbox" checked disabled><label>Status Tracking</label></div></div></div>`;
+        } else if (hash === 'test') { // NEW
+            renderTestView();
+        } else if (hash === 'ship') { // NEW
+            renderShipView();
         }
 
         const mobileNav = document.querySelector('.mobile-nav');
