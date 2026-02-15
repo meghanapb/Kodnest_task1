@@ -18,15 +18,15 @@
     --badge-other: #757575;
     --badge-bg-neutral: #EEEEEE;
 
-    /* Match Score Colors */
+    /* Match Score Colors - FIXED */
     --match-high: #2E7D32;
-    /* Green 800 */
+    /* Green */
     --match-med: #F57F17;
-    /* Amber 900 - Darker for readability */
-    --match-low: #616161;
-    /* Grey 700 */
-    --match-none: #9E9E9E;
-    /* Grey 500 */
+    /* Amber */
+    --match-neutral: #546E7A;
+    /* Blue Grey - Neutral */
+    --match-subtle: #9E9E9E;
+    /* Grey - Subtle */
 
     /* Typography */
     --font-serif: 'Merriweather', serif;
@@ -423,6 +423,7 @@ a {
     border: 1px solid var(--border-color);
 }
 
+/* Match Score Colors - FIXED */
 .match-score.high {
     color: var(--match-high);
     border-color: var(--match-high);
@@ -435,10 +436,16 @@ a {
     background-color: #FFF8E1;
 }
 
-.match-score.low {
-    color: var(--match-low);
-    border-color: var(--match-low);
-    background-color: #F5F5F5;
+.match-score.neutral {
+    color: var(--match-neutral);
+    border-color: var(--match-neutral);
+    background-color: #ECEFF1;
+}
+
+.match-score.subtle {
+    color: var(--match-subtle);
+    border-color: var(--border-color);
+    background-color: #FAFAFA;
 }
 
 .posted-ago {
@@ -516,6 +523,74 @@ a {
     font-size: 15px;
     line-height: 1.6;
     color: var(--text-primary);
+}
+
+/* Digest View Styles */
+.digest-container {
+    background-color: #FFFFFF;
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin: var(--space-lg) auto;
+    text-align: left;
+    padding: 0;
+    /* Let children handle padding */
+}
+
+.digest-header {
+    background-color: #F8F8F8;
+    padding: var(--space-lg) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.digest-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.digest-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+.digest-body {
+    padding: var(--space-md);
+}
+
+.digest-item {
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.digest-item:last-child {
+    border-bottom: none;
+}
+
+.digest-footer {
+    background-color: #F8F8F8;
+    padding: var(--space-md);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.digest-actions {
+    margin-top: var(--space-md);
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
 }
 
 /* Hero Section (Home) */
